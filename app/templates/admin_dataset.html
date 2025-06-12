@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Admin - Dataset{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Dataset Management</h2>
+
+    <form action="{{ url_for('admin.dataset') }}" method="POST" enctype="multipart/form-data" class="mb-4">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-6">
+                <input type="file" name="dataset_file" class="form-control" required>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">Upload Dataset</button>
+            </div>
+        </div>
+    </form>
+
+    <h5 class="mt-5">Available Datasets:</h5>
+    <table class="table table-bordered table-striped mt-2">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Filename</th>
+                <th>Download</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if datasets %}
+                {% for file in datasets %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ file }}</td>
+                    <td><a href="{{ url_for('static', filename='datasets/' + file) }}" download class="btn btn-sm btn-success">Download</a></td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="3" class="text-center">No dataset files found.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

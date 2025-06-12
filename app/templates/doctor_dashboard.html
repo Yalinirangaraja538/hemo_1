@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Doctor Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Welcome, Dr. {{ current_user.name }}</h2>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5>Total Cases</h5>
+                    <p class="display-6">{{ total_cases }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Search -->
+    <form method="get" class="form-inline mb-3">
+        <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Search patients..." value="{{ search_term }}">
+            <div class="input-group-append">
+                <button type="submit" class="btn btn-outline-primary">Search</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Patient List -->
+    <div class="card mb-5">
+        <div class="card-header"><strong>Patients</strong></div>
+        <div class="card-body p-0">
+            {% if patients %}
+                <table class="table table-striped mb-0">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Photo</th>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>View</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for patient in patients %}
+                        <tr>
+                            <td>
+                                {% if patient.profile_photo %}
+                                    <img src="{{ url_for('static', filename=patient.profile_photo) }}" class="rounded-circle" width="40" height="40">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='default_profile.png') }}" class="rounded-circle" width="40" height="40">
+                                {% endif %}
+                            </td>
+                            <td>{{ patient.name }}</td>
+                            <td>{{ patient.age }}</td>
+                            <td>{{ patient.gender }}</td>
+                            <td><a href="{{ url_for('doctor_routes.view_patient', patient_id=patient.id) }}" class="btn btn-sm btn-info">View</a>
+</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="p-3">No patients found.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Predictions -->
+    <div class="card">
+        <div class="card-header"><strong>Recent Predictions</strong></div>
+        <div class="card-body p-0">
+            {% if past_predictions %}
+                <table class="table table-bordered table-hover mb-0">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Patient Name</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>Prediction</th>
+                            <th>Confidence</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pred in past_predictions %}
+                        <tr>
+                            <td>{{ pred.patient_name }}</td>
+                            <td>{{ pred.patient_age }}</td>
+                            <td>{{ pred.patient_gender }}</td>
+                            <td><strong>{{ pred.prediction }}</strong></td>
+                            <td>{{ pred.confidence }}%</td>
+                            <td>{{ pred.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="p-3">No predictions found.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

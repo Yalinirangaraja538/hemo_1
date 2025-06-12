@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Enable 2FA{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Enable Two-Factor Authentication (2FA)</h2>
+
+    {% if not twofa_enabled %}
+        <div class="alert alert-info">
+            To enable 2FA, scan the QR code below using an authenticator app (e.g., Google Authenticator, Authy).
+        </div>
+
+        <div class="text-center mb-4">
+            <img src="{{ qr_code }}" alt="2FA QR Code" class="img-fluid" style="max-width: 300px;">
+        </div>
+
+        <form method="POST">
+            <div class="mb-3">
+                <label for="otp" class="form-label">Enter the 6-digit code from your app</label>
+                <input type="text" class="form-control" id="otp" name="otp" maxlength="6" required>
+            </div>
+            <button type="submit" class="btn btn-success">Enable 2FA</button>
+            <a href="{{ url_for('admin.security') }}" class="btn btn-secondary ms-2">Cancel</a>
+        </form>
+    {% else %}
+        <div class="alert alert-success">
+            Two-Factor Authentication is already <strong>enabled</strong> for your account.
+        </div>
+        <a href="{{ url_for('admin.security') }}" class="btn btn-primary">Back to Security Settings</a>
+    {% endif %}
+</div>
+{% endblock %}

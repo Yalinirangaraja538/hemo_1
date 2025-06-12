@@ -1,0 +1,244 @@
+{% extends 'admin_base.html' %}
+
+{% block head %}
+<style>
+    body {
+        background-color: #f5f7fa;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    h2, h4 {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .card {
+        border-radius: 12px;
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .card:hover {
+        transform: scale(1.01);
+    }
+
+    .card-header {
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    .list-group-item {
+        border: none;
+        border-bottom: 1px solid #eee;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border: none;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+    }
+
+    .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    canvas {
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .table {
+        background-color: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table th {
+        background-color: #ecf0f1;
+        font-weight: 500;
+    }
+
+    .table td, .table th {
+        vertical-align: middle;
+    }
+
+    .text-muted {
+        font-style: italic;
+    }
+
+    .shadow-sm {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-select-sm {
+        font-size: 0.875rem;
+        padding: 0.25rem 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Admin Dashboard</h2>
+
+    <!-- First Row -->
+    <div class="row mb-4">
+        <!-- System Status -->
+        <div class="col-md-6 mb-3">
+            <div class="card border-success shadow-sm h-100">
+                <div class="card-header bg-success text-white">System Status</div>
+                <div class="card-body">
+                    <p class="mb-2">All services running smoothly:</p>
+                    <ul class="list-unstyled mb-0">
+                        <li><strong>Prediction Engine:</strong> <span class="text-success">Online</span></li>
+                        <li><strong>Email Service:</strong> <span class="text-success">Operational</span></li>
+                        <li><strong>Database:</strong> <span class="text-success">Connected</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Doctor Approvals -->
+        <div class="col-md-6 mb-3">
+            <div class="card border-warning shadow-sm h-100">
+                <div class="card-header bg-warning text-dark">Pending Doctor Approvals</div>
+                <div class="card-body">
+                    {% if pending_doctors %}
+                        <ul class="list-group">
+                            {% for doctor in pending_doctors %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>{{ doctor.username }}</strong><br>
+                                        <small>{{ doctor.email }}</small>
+                                    </div>
+                                    <form action="{{ url_for('admin.approve_doctor', user_id=doctor.id) }}" method="post" class="mb-0 d-inline">
+                                        <button type="submit" class="btn btn-sm btn-success" aria-label="Approve Doctor">Approve</button>
+                                    </form>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted mb-0">No doctors pending approval.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prediction Trends Chart -->
+
+    <!-- Additional Data Section -->
+    <div class="row mb-4">
+        <!-- Recent Users -->
+        <div class="col-md-6 mb-3">
+            <div class="card border-info shadow-sm h-100">
+                <div class="card-header bg-info text-white">Recent User Registrations</div>
+                <div class="card-body">
+                    {% if recent_users %}
+                        <ul class="list-group">
+                            {% for user in recent_users %}
+                                <li class="list-group-item d-flex align-items-center">
+                                    <img src="{{ url_for('static', filename='uploads/profiles/' ~ user.profile_photo if user.profile_photo else 'default.png') }}"
+                                         alt="Avatar" class="rounded-circle me-3" width="40" height="40">
+                                    <div>
+                                        <strong>{{ user.username }}</strong><br>
+                                        <small class="text-muted">{{ user.email }}</small><br>
+                                        <small class="text-muted">{{ user.registered_on.strftime('%b %d, %Y') }}</small>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No recent registrations.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- System Logs -->
+        <div class="col-md-6 mb-3">
+            <div class="card border-secondary shadow-sm h-100">
+                <div class="card-header bg-secondary text-white">System Logs (Recent Activities)</div>
+                <div class="card-body">
+                    {% if system_logs %}
+                        <ul class="list-group small">
+                            {% for log in system_logs %}
+                                <li class="list-group-item">
+                                    <span class="text-dark">{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}</span> — {{ log.message }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No recent activity logs available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    const trendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ months | safe }},
+            datasets: [
+                {
+                    label: 'Leukemia Cases',
+                    data: {{ leukemia_cases | safe }},
+                    borderColor: 'rgba(231, 76, 60, 1)',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Healthy Cases',
+                    data: {{ healthy_cases | safe }},
+                    borderColor: 'rgba(46, 204, 113, 1)',
+                    backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Monthly Prediction Trends',
+                    font: {
+                        size: 18
+                    }
+                },
+                legend: {
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Cases Count'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Month'
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

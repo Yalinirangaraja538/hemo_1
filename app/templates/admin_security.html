@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Security{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Security Settings</h2>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- 2FA Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <strong>Authentication</strong>
+        </div>
+        <div class="card-body">
+            <p>
+                Two-Factor Authentication (2FA):
+                {% if current_user.two_factor_enabled %}
+                    <span class="badge bg-success">Enabled</span>
+                    <form action="{{ url_for('main.disable_2fa') }}" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-danger btn-sm">Disable 2FA</button>
+                    </form>
+                {% else %}
+                    <span class="badge bg-warning text-dark">Not Enabled</span>
+                    <a href="{{ url_for('main_routes.enable_2fa') }}" class="btn btn-primary btn-sm">Enable 2FA</a>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Password Policy Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <strong>Password Policy</strong>
+        </div>
+        <div class="card-body">
+            <ul class="mb-3">
+                <li>Minimum 8 characters</li>
+                <li>Must contain uppercase, lowercase, and a number</li>
+                <li>Expires every 90 days (enforced: <strong>No</strong>)</li>
+            </ul>
+            <!-- admin_security.html -->
+        <a href="{{ url_for('main_routes.edit_password_policy') }}" class="btn btn-secondary btn-sm">Edit Policy</a>
+
+        </div>
+    </div>
+
+    <!-- Security Logs Section -->
+    <div class="card">
+        <div class="card-header">
+            <strong>Security Logs</strong>
+        </div>
+        <div class="card-body">
+            <p>Recent security activities:</p>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    🛠️ <strong>2025-05-24 10:12:34</strong> – Password changed for user <strong>admin</strong>
+                </li>
+                <li class="list-group-item">
+                    ❌ <strong>2025-05-23 22:05:10</strong> – Failed login attempt from IP <strong>192.168.1.101</strong>
+                </li>
+                <li class="list-group-item">
+                    ✅ <strong>2025-05-23 08:45:22</strong> – New device logged in: Chrome on Windows
+                </li>
+            </ul>
+            <a href="{{ url_for('admin.logs') }}" class="btn btn-outline-dark btn-sm mt-3">View Full Logs</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

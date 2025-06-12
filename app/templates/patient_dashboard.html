@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Patient Dashboard - HemoDetect</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      background: linear-gradient(to right, #e6f0ff, #f8f9ff);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    h2, h5, h6 {
+      color: #002b80;
+    }
+
+    .card {
+      border: none;
+      border-radius: 1rem;
+      background: #ffffff;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+      transition: all 0.3s ease-in-out;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+    }
+
+    .upload-btn {
+      background-color: #005ce6;
+      color: white;
+      font-weight: 500;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 8px rgba(0, 92, 230, 0.3);
+      transition: background 0.3s ease-in-out;
+    }
+
+    .upload-btn:hover {
+      background-color: #0041b3;
+    }
+
+    .form-control {
+      border-radius: 0.4rem;
+    }
+
+    .form-control:focus {
+      border-color: #005ce6;
+      box-shadow: 0 0 0 0.2rem rgba(0, 92, 230, 0.25);
+    }
+
+    .next-checkup {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #005ce6;
+    }
+
+    .sidebar-link {
+      font-weight: 500;
+      color: #333;
+      transition: color 0.2s ease-in-out;
+    }
+
+    .sidebar-link:hover {
+      text-decoration: underline;
+      color: #004fcc;
+    }
+
+    .chat-ai-launcher {
+      background: #f4f8ff;
+      padding: 1rem;
+      border-radius: 1rem;
+      text-align: center;
+      border: 2px dashed #cce0ff;
+      transition: background 0.3s ease-in-out;
+    }
+
+    .chat-ai-launcher:hover {
+      background: #e6f0ff;
+    }
+
+    .text-primary-strong {
+      color: #003bb3;
+      font-weight: 600;
+    }
+
+    .btn-outline-primary {
+      border-color: #005ce6;
+      color: #005ce6;
+    }
+
+    .btn-outline-primary:hover {
+      background-color: #005ce6;
+      color: #fff;
+    }
+
+    .small.fst-italic {
+      color: #777;
+    }
+
+    .list-unstyled li {
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .card .fw-semibold {
+      color: #002b80;
+    }
+
+    .text-muted {
+      color: #6c757d !important;
+    }
+
+    a.btn-outline-primary.btn-sm {
+      padding: 4px 10px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Navbar -->
+<nav class="navbar navbar-light bg-white shadow-sm mb-4">
+  <div class="container-fluid justify-content-between align-items-center">
+    <a class="navbar-brand fw-bold text-primary" href="#">HemoDetect</a>
+    <div class="d-flex align-items-center">
+      <span class="me-3 text-muted small">Logged in as <strong>{{ current_user.username }}</strong></span>
+      <a href="{{ url_for('main_routes.logout') }}" class="btn btn-sm btn-outline-danger">
+        <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
+      </a>
+    </div>
+  </div>
+</nav>
+
+  <div class="container py-5">
+    <!-- Header -->
+    <div class="row mb-4">
+      <div class="col-md-12 text-center">
+        <h2 class="fw-bold">Welcome to Your HemoDetect Dashboard</h2>
+        <p class="text-muted">Stay informed. Stay healthy. AI-powered diagnostics at your fingertips.</p>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- Left Column -->
+      <div class="col-md-3">
+        <div class="card p-4">
+          <h6 class="fw-semibold mb-3">Your Health Journey</h6>
+          <ul class="list-unstyled">
+            <li>✔️ Registered</li>
+            <li>✔️ Uploaded report</li>
+            <li>✔️ AI Analyzed</li>
+            <li>📅 Next Checkup</li>
+          </ul>
+        </div>
+      </div>
+
+  <!-- Inside your upload card in the center column -->
+<div class="col-md-6">
+  <div class="card p-4 text-center mb-4">
+    <h5 class="mb-2 fw-semibold">📤 Upload a Hemoglobin Report</h5>
+    <p class="text-muted mb-1">
+      Upload your blood test report in <strong>JPEG</strong> or <strong>PNG</strong> format.
+      Our intelligent <span class="text-primary-strong">AI engine</span> will scan the report to detect conditions like 
+      <strong>anemia, low hemoglobin levels, or RBC abnormalities</strong>.
+    </p>
+    <p class="text-muted mb-3">
+      After analysis, you’ll receive an instant response and a downloadable summary report in PDF format.
+    </p>
+    <p class="text-muted small fst-italic">
+      For best accuracy, ensure the image is clear and well-lit. Avoid handwritten or blurry reports.
+    </p>
+
+    <!-- Redirect-only button (no input tag) -->
+{% set sorted_reports = reports|sort(attribute='created_at', reverse=True) %}
+{% for report in sorted_reports %}
+  {% if loop.first %}
+    <a href="{{ url_for('patient_routes.results', report_id=report.id) }}" class="btn btn-primary w-100 mb-3">
+      uploads & reports 
+    </a>
+  {% endif %}
+{% endfor %}
+
+  </div>
+
+
+        <!-- Tips -->
+        <div class="card p-3">
+          <h6>🩺 Health Tip</h6>
+          <p class="text-muted mb-0">
+            Include iron-rich foods like spinach, beans, lentils, and fortified cereals in your diet to improve hemoglobin levels.
+          </p>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div class="col-md-3">
+  <div class="card p-4 mb-4 shadow-sm" style="background: linear-gradient(to bottom right, #f8f9fa, #e0f7fa); border-left: 5px solid #0d6efd;">
+    <h6 class="mb-3 fw-bold text-primary d-flex align-items-center">
+      <i class="fa-solid fa-folder-open me-2"></i> Your Reports
+    </h6>
+
+    {% if reports %}
+      {% set sorted_reports = reports|sort(attribute='created_at', reverse=True) %}
+      {% for report in sorted_reports %}
+        <div class="mb-3 px-3 py-3 rounded report-item {% if loop.first %}report-highlight border-start border-4 border-primary{% endif %}">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <span class="text-muted small">{{ report.timestamp.strftime('%b %d, %Y') }}</span><br>
+              <span class="fw-semibold {% if loop.first %}text-primary{% endif %}">
+                <i class="fa-solid {% if 'normal' in report.result|lower %}fa-circle-check text-success
+                  {% elif 'acute' in report.result|lower %}fa-triangle-exclamation text-danger
+                  {% else %}fa-stethoscope text-warning{% endif %} me-1"></i>
+                {{ report.result }}
+              </span>
+            </div>
+            <a href="{{ url_for('patient_routes.download_report', report_id=report.id) }}"
+               class="btn btn-sm btn-outline-primary d-flex align-items-center">
+              <i class="fa-solid fa-file-arrow-down me-1"></i> PDF
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-muted small">No reports yet.</p>
+    {% endif %}
+  </div>
+</div>
+
+    
+  </div>
+</body>
+</html>

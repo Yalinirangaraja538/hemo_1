@@ -1,0 +1,128 @@
+{% extends 'admin_base.html' %}
+{% block content %}
+<div class="container mt-5">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-5 border-bottom pb-3">
+    <h2 class="fw-bold text-dark">Admin Analytics Dashboard</h2>
+    <span class="text-muted small">Last updated: <span id="lastUpdated"></span></span>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="row g-4 mb-4">
+    {% for title, value, color, icon, tooltip in [
+      ('Total Users', total_users, 'dark', 'fa-users', 'All registered users'),
+      ('Total Patients', total_patients, 'info', 'fa-user-injured', 'Users registered as patients'),
+      ('Total Doctors', total_doctors, 'warning', 'fa-user-md', 'Users registered as doctors'),
+      
+    ] %}
+    <div class="col-md-3">
+      <div class="card border-0 rounded-4 shadow-sm bg-{{ color }} text-white h-100" data-bs-toggle="tooltip" title="{{ tooltip }}">
+        <div class="card-body">
+          <h6 class="text-uppercase fw-light"><i class="fas {{ icon }} me-2"></i>{{ title }}</h6>
+          <h2 class="fw-semibold mt-2" id="{{ title | replace(' ', '_') }}">{{ value }}</h2>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Charts Row -->
+  
+    
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+        <h6 class="fw-semibold mb-3">🧩 User Role Distribution</h6>
+        <canvas id="roleDistributionChart" style="height: 300px;"></canvas>
+      </div>
+    </div>
+
+    <div class="col-md-6 d-flex justify-content-end">
+      <div class="card border-0 shadow-sm rounded-4 p-4 w-100" style="max-width: 450px;">
+        <h6 class="fw-semibold mb-3">📈 Monthly User Growth</h6>
+        <canvas id="monthlyUsersChart" style="height: 250px;"></canvas>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <!-- Export Buttons -->
+  <div class="d-flex justify-content-end gap-2 mt-4">
+    <button class="btn btn-outline-secondary rounded-pill px-4 py-2" onclick="exportCSV()">
+      <i class="fas fa-file-csv me-2"></i>Download CSV
+    </button>
+    <button class="btn btn-outline-secondary rounded-pill px-4 py-2" onclick="window.print()">
+      <i class="fas fa-print me-2"></i>Print Report
+    </button>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script>
+  document.getElementById("lastUpdated").innerText = new Date().toLocaleString();
+
+
+  new Chart(document.getElementById('roleDistributionChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Patients', 'Doctors'],
+      datasets: [{
+        data: [{{ total_patients }}, {{ total_doctors }}],
+        backgroundColor: ['#3498db', '#f1c40f']
+      }]
+    },
+    options: {
+      plugins: {
+        title: { display: true, text: 'User Role Distribution' }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('monthlyUsersChart'), {
+    type: 'line',
+    data: {
+      labels: {{ months | safe }},
+      datasets: [{
+        label: 'New Users',
+        data: {{ counts | safe }},
+        fill: true,
+        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        tension: 0.3
+      }]
+    },
+    options: {
+      plugins: {
+        title: { display: true, text: 'Monthly User Growth' }
+      }
+    }
+  });
+
+  function exportCSV() {
+    const data = [
+      ["Metric", "Value"],
+      ["Total Users", {{ total_users }}],
+      ["Total Patients", {{ total_patients }}],
+      ["Total Doctors", {{ total_doctors }}],
+      ["Active Doctors", {{ active_doctors }}],
+      ["Total Predictions", {{ total_predictions }}],
+      ["Leukemia Cases", {{ leukemia_cases }}],
+      ["Healthy Cases", {{ healthy_cases }}]
+    ];
+    let csv = data.map(row => row.join(",")).join("\n");
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = "admin_analytics_report.csv";
+    a.click();
+  }
+
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+  tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
+</script>
+{% endblock %}

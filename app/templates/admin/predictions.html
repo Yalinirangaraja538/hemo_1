@@ -1,0 +1,40 @@
+{% extends 'admin_dashboard.html' %}
+{% block content %}
+<h2>Predictions History</h2>
+
+<table border="1" cellpadding="10" cellspacing="0" style="width: 100%; text-align: center;">
+    <thead style="background-color: #2ecc71; color: white;">
+        <tr>
+            <th>ID</th>
+            <th>User</th>
+            <th>Date</th>
+            <th>Result</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for prediction in predictions %}
+        <tr>
+            <td>{{ prediction.id }}</td>
+            <td>{{ prediction.user.username if prediction.user else 'Unknown' }}</td>
+            <td>{{ prediction.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>
+                {% if prediction.result == 'Leukemia' %}
+                    <span style="color: red;">{{ prediction.result }}</span>
+                {% else %}
+                    <span style="color: green;">{{ prediction.result }}</span>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<br>
+
+<a href="{{ url_for('admin.download_reports') }}">
+    <button style="padding: 10px 20px; background-color: #3498db; color: white; border: none; cursor: pointer;">
+        Download Full Report (CSV)
+    </button>
+</a>
+
+{% endblock %}

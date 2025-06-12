@@ -1,0 +1,54 @@
+{% extends 'admin_base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Download Medical Reports</h2>
+
+    <!-- Search Bar -->
+    <form method="GET" class="mb-4">
+        <div class="input-group">
+            <input type="text" class="form-control" name="query" placeholder="Search by patient name or ID" value="{{ request.args.get('query', '') }}">
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+    </form>
+
+    <!-- Reports Table -->
+    <div class="table-responsive">
+        <table class="table table-hover align-middle shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>Report ID</th>
+                    <th>Patient Name</th>
+                    <th>Prediction Result</th>
+                    <th>Date Generated</th>
+                    <th>Download</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in reports %}
+                <tr>
+                    <td>{{ report.id }}</td>
+                    <td>{{ report.patient.name }}</td>
+                    <td>
+                        {% if report.prediction.result == 'Leukemia' %}
+                        <span class="badge bg-danger">{{ report.prediction.result }}</span>
+                        {% else %}
+                        <span class="badge bg-success">{{ report.prediction.result }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ report.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        <a href="{{ url_for('patient.download_report_pdf', report_id=report.id) }}" class="btn btn-outline-primary btn-sm" target="_blank">
+                            <i class="bi bi-download"></i> PDF
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">No reports found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'admin_dashboard.html' %}
+{% block content %}
+<h2>Edit User</h2>
+
+<form method="POST">
+    <label>Username:</label><br>
+    <input type="text" name="username" value="{{ user.username }}" required><br><br>
+
+    <label>Email:</label><br>
+    <input type="email" name="email" value="{{ user.email }}" required><br><br>
+
+    <label>Role:</label><br>
+    <select name="role" required>
+        <option value="doctor" {% if user.role == 'doctor' %}selected{% endif %}>Doctor</option>
+        <option value="patient" {% if user.role == 'patient' %}selected{% endif %}>Patient</option>
+        <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+    </select><br><br>
+
+    <button type="submit">Update User</button>
+</form>
+
+{% endblock %}
