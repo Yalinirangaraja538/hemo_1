@@ -1,3 +1,5 @@
+python-3.11.8
+
 # Core tools
 pip>=24.0
 setuptools>=65.0.0
